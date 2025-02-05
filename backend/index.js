@@ -10,13 +10,19 @@ const __dirname = path.resolve();
 const app = express();
 const server = http.createServer(app);
 
-if (process.env.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "../frontend/dist")));
+// if (process.env.NODE_ENV === "production") {
+//     app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-    app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
-    });
-}
+//     app.get("*", (req, res) => {
+//         res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+//     });
+// }
+
+const socketIdToPeerId = new Map();
+
+setTimeout(() => {
+    console.log("All Mapped IDs:", [...socketIdToPeerId.entries()]);
+}, 5000);
 
 const io = new Server(server, {
     cors: {
@@ -28,15 +34,11 @@ io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
     socket.on("join-chat", ({ roomId, id, name }) => {
+        socketIdToPeerId.set(socket.id, id);
+        console.log("map:", socketIdToPeerId.get(socket.id));
         console.log(`${name} with ${id} joined room ${roomId}`);
         socket.join(roomId);
         socket.broadcast.to(roomId).emit("user-connected", { name, id });
-    });
-
-    socket.on("leave-chat", ({ roomId, id }) => {
-        console.log(`User ${id} left room ${roomId}`);
-        socket.leave(roomId);
-        socket.broadcast.to(roomId).emit("user-leaves", id);
     });
 
     // ✅ Emit mic toggle event
@@ -55,8 +57,20 @@ io.on("connection", (socket) => {
         socket.broadcast.to(roomId).emit("toggle-video", { userId, video });
     });
 
+    socket.on("leave-chat", ({ roomId, id }) => {
+        console.log(`User ${id} left room ${roomId}`);
+        socket.leave(roomId);
+        socket.broadcast.to(roomId).emit("user-leaves", id);
+        socketIdToPeerId.delete(socket.id); // Remove user from map
+    });
+
     socket.on("disconnect", () => {
-        console.log("User disconnected:", socket.id);
+        const peerId = socketIdToPeerId.get(socket.id);
+        if (peerId) {
+            socket.broadcast.emit("user-leaves", peerId);
+            socketIdToPeerId.delete(socket.id);
+        }
+        console.log("User disconnected:", peerId);
     });
 });
 

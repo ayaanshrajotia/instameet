@@ -36,15 +36,19 @@ function ChatRoom() {
     const peer = peerRef.current;
 
     useEffect(() => {
+        if (!stream) return;
+
         if (!name) {
             socket.emit("leave-chat", { roomId, id: myId });
             setConnectedPeers([]);
             navigate("/");
         }
-    }, [myId, name, navigate, roomId, socket]);
+    }, [myId, name, navigate, roomId, socket, stream]);
 
     // Connect to the peer server
     useEffect(() => {
+        if (!stream) return;
+
         peer.on("open", (id) => {
             console.log("My peer ID is:", id);
             setMyId(id);
@@ -105,6 +109,7 @@ function ChatRoom() {
     // Answer the call and set the peer stream
     useEffect(() => {
         if (!stream) return;
+
         peer.on("call", (call) => {
             const { peer: callerId, metadata } = call;
             const callerName = metadata.name;
@@ -158,7 +163,7 @@ function ChatRoom() {
             setIsMicOn(!isMicOn);
         }
 
-        // Emit the mic toggle event to other users
+        // Emit mic toggle event to other users
         socket.emit("toggle-mic", { userId, muted: !userPeer.muted });
     };
 
@@ -218,6 +223,18 @@ function ChatRoom() {
         };
     }, [socket]);
 
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            socket.emit("leave-chat", { roomId, id: myId });
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [myId, roomId, socket]);
+
     // console.log({ peer });
     // console.log(myId, name, roomId);
     // console.log({ stream, peerStream });
@@ -258,7 +275,7 @@ function ChatRoom() {
                         peer.video ? (
                             <div
                                 key={peer.id}
-                                className={`relative flex h-full w-full justify-center items-center bg-[#242A2E] rounded-xl overflow-hidden transition-all duration-700`}
+                                className={`relative flex h-full w-full justify-center items-center bg-[#242A2E] rounded-xl overflow-hidden transition-all duration-700 `}
                             >
                                 <ReactPlayer
                                     url={peer.stream}
@@ -272,7 +289,10 @@ function ChatRoom() {
                                 </span>
                             </div>
                         ) : (
-                            <PlayerSkeleton key={peer.id} name={capitalizaFirstLetter(peer.name)} />
+                            <PlayerSkeleton
+                                key={peer.id}
+                                name={capitalizaFirstLetter(peer.name)}
+                            />
                         )
                     )}
 
@@ -292,7 +312,7 @@ function ChatRoom() {
                                 <ReactPlayer
                                     url={peer.stream}
                                     playing={true}
-                                    muted={peer.muted}
+                                    muted={true}
                                     width={"100%"}
                                     height={"100%"}
                                 />
@@ -301,7 +321,10 @@ function ChatRoom() {
                                 </span>
                             </div>
                         ) : connectedPeers.length === 1 ? (
-                            <PlayerSkeleton key={peer.id} name={capitalizaFirstLetter(peer.name)} />
+                            <PlayerSkeleton
+                                key={peer.id}
+                                name={capitalizaFirstLetter(peer.name)}
+                            />
                         ) : (
                             <PlayerSkeletonUser
                                 key={peer.id}
@@ -310,8 +333,12 @@ function ChatRoom() {
                         )
                     )}
                 <div className="absolute left-0 bottom-0 flex items-center justify-center gap-5 w-screen h-[80px]">
-                    <div className="flex items-center justify-center bg-[#242A2E] rounded-full p-3">
+                    <div
+                        className="flex items-center justify-center bg-[#242A2E] rounded-full p-3 gap-2 cursor-pointer"
+                        onClick={() => alert("Feature coming soon")}
+                    >
                         <Users width={24} height={24} />
+                        {/* <span>{connectedPeers.length - 1}</span> */}
                     </div>
                     <div
                         className="flex items-center justify-center bg-[#242A2E] rounded-full p-3 cursor-pointer"
@@ -343,8 +370,12 @@ function ChatRoom() {
                             <VideoOff width={24} height={24} />
                         )}
                     </div>
-                    <div className="flex items-center justify-center bg-[#242A2E] rounded-full p-3">
-                        <MessageSquareText width={24} height={24} />
+                    <div className="flex items-center justify-center bg-[#242A2E] rounded-full p-3 cursor-pointer">
+                        <MessageSquareText
+                            width={24}
+                            height={24}
+                            onClick={() => alert("Feature coming soon")}
+                        />
                     </div>
                 </div>
             </div>

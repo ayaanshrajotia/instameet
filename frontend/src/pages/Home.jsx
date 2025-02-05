@@ -2,10 +2,12 @@ import { useEffect } from "react";
 import { useSocket } from "../context/socket";
 import { useNavigate } from "react-router-dom";
 import { useChat } from "../context/chat";
+import useMediaStream from "../hooks/useMediaStream";
 
 function Home() {
     const { setName, setRoom, name, room } = useChat();
     const { socket } = useSocket();
+    const { stream } = useMediaStream();
 
     const navigate = useNavigate();
 
