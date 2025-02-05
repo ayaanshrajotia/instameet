@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+.website-head {
+    background: #dadada;
+    background: linear-gradient(to right, #dadada 0%, #ececec 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

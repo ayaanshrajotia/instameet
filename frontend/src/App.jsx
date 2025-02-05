@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import "./App.css";
 import ChatRoom from "./pages/ChatRoom";
 import { ChatProvider } from "./context/chat";
+import { Toaster } from "react-hot-toast";
 
 function App() {
     return (
@@ -18,6 +19,7 @@ function App() {
                     </Routes>
                 </BrowserRouter>
             </ChatProvider>
+            <Toaster />
         </div>
     );
 }

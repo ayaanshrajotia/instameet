@@ -4,10 +4,12 @@ import ReactPlayer from "react-player";
 import useMediaStream from "../hooks/useMediaStream";
 import { useSocket } from "../context/socket";
 import {
+    CopyIcon,
     MessageSquareText,
     Mic,
     MicOff,
     Phone,
+    User,
     Users,
     Video,
     VideoOff,
@@ -17,6 +19,7 @@ import { useChat } from "../context/chat";
 import PlayerSkeleton from "../../components/PlayerSkeleton";
 import PlayerSkeletonUser from "../../components/PlayerSkeletonUser";
 import { capitalizaFirstLetter } from "../libs/utils";
+import toast from "react-hot-toast";
 
 function ChatRoom() {
     const { name, room: roomId } = useChat();
@@ -34,6 +37,11 @@ function ChatRoom() {
         peerRef.current = new Peer();
     }
     const peer = peerRef.current;
+
+    const CopyToClipbooard = () => {
+        navigator.clipboard.writeText(roomId);
+        toast.success("Room ID copied to clipboard");
+    };
 
     useEffect(() => {
         if (!stream) return;
@@ -243,13 +251,26 @@ function ChatRoom() {
     return (
         <div className="">
             <nav className="h-[60px]">
-                <div className="flex h-full p-2 px-4 items-center gap-2.5">
-                    <img
-                        src="/images/user-avatar.png"
-                        alt=""
-                        className="w-10 h-10"
-                    />
-                    <span>{capitalizaFirstLetter(name)}</span>
+                <div className="flex h-full p-2 px-4 items-center justify-between gap-2.5">
+                    <div className="flex gap-2 items-center">
+                        <User width={24} height={24} />
+                        <span>{capitalizaFirstLetter(name)}</span>
+                    </div>
+                    <div className="flex gap-2 bg-[#242A2E] rounded-full p-1 px-2 pl-3 items-center">
+                        <span className="w-[80px] overflow-ellipsis truncate text-sm">
+                            {roomId}
+                        </span>
+                        <button
+                            className="flex items-center gap-2 bg-[#181d1f] rounded-full p-2"
+                            onClick={CopyToClipbooard}
+                        >
+                            <CopyIcon
+                                width={16}
+                                height={16}
+                                className="cursor-pointer"
+                            />
+                        </button>
+                    </div>
                 </div>
             </nav>
             <div
