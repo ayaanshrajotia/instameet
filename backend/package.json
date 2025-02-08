@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "dev": "nodemon index.js",
-        "start": "node index.js"
+        "dev": "nodemon src/index.js",
+        "start": "node src/index.js"
     },
     "keywords": [],
     "author": "",
@@ -12,6 +12,7 @@
     "type": "module",
     "description": "",
     "dependencies": {
+        "@google/generative-ai": "^0.21.0",
         "dotenv": "^16.4.7",
         "express": "^4.21.2",
         "socket.io": "^4.8.1"

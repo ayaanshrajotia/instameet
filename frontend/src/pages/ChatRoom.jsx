@@ -10,6 +10,7 @@ import {
     MicOff,
     Phone,
     SendHorizonalIcon,
+    Sparkle,
     User,
     Users,
     Video,
@@ -22,6 +23,7 @@ import PlayerSkeleton from "../../components/PlayerSkeleton";
 import PlayerSkeletonUser from "../../components/PlayerSkeletonUser";
 import { capitalizaFirstLetter } from "../libs/utils";
 import toast from "react-hot-toast";
+import ReactMarkdown from "react-markdown";
 
 function ChatRoom() {
     const { name, room: roomId } = useChat();
@@ -34,6 +36,9 @@ function ChatRoom() {
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [isQuestionForAI, setIsQuestionForAI] = useState(false);
+
+    const messageEndRef = useRef(null);
 
     const { stream } = useMediaStream();
 
@@ -100,9 +105,19 @@ function ChatRoom() {
 
     const handleSendMessage = (e) => {
         e.preventDefault();
-        if (!message) return;
-        socket.emit("send-message", { roomId, name, message });
-        setMessage("");
+        try {
+            if (!message) return;
+
+            if (isQuestionForAI) {
+                socket.emit("ask-question", { roomId, name, prompt: message });
+                return;
+            }
+            socket.emit("send-message", { roomId, name, message });
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setMessage("");
+        }
     };
 
     useEffect(() => {
@@ -270,6 +285,11 @@ function ChatRoom() {
         };
     }, [myId, roomId, socket]);
 
+    useEffect(() => {
+        if (messageEndRef.current && messages)
+            messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
     // console.log({ peer });
     // console.log(myId, name, roomId);
     // console.log({ stream, peerStream });
@@ -425,21 +445,30 @@ function ChatRoom() {
                                         msg.name === name
                                             ? "justify-end"
                                             : "justify-start"
-                                    } m-1 mr-2`}
+                                    } m-1 my-1.5 mr-2 text-sm max-w-[270px]`}
+                                    ref={messageEndRef}
                                 >
                                     <div
-                                        className={`flex flex-col p-2 px-4 bg-[#181d1f] rounded-xl`}
+                                        className={`flex flex-col p-2 px-4  rounded-xl ${
+                                            msg.name === "gemini"
+                                                ? "bg-[#3c94b1]"
+                                                : "bg-[#0c0e0f]"
+                                        }`}
                                     >
                                         <span
-                                            className={`text-xs ${
+                                            className={`text-xs font-semibold mb-1 ${
                                                 msg.name === name
                                                     ? "hidden"
                                                     : ""
                                             }`}
                                         >
-                                            {msg.name}
+                                            {capitalizaFirstLetter(msg.name)}
                                         </span>
-                                        <span>{msg.message}</span>
+                                        <span>
+                                            <ReactMarkdown>
+                                                {msg.message}
+                                            </ReactMarkdown>
+                                        </span>
                                     </div>
                                 </div>
                             ))}
@@ -455,6 +484,22 @@ function ChatRoom() {
                                 onChange={(e) => setMessage(e.target.value)}
                                 placeholder="Type a message"
                             />
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setIsQuestionForAI(!isQuestionForAI)
+                                }
+                                className="cursor-pointer"
+                            >
+                                <Sparkle
+                                    width={22}
+                                    height={22}
+                                    className={`text-[#3c94b1] ${
+                                        isQuestionForAI ? "fill-[#3c94b1]" : ""
+                                    }`}
+                                    strokeWidth={2}
+                                />
+                            </button>
                             <button type="submit" className="cursor-pointer">
                                 <SendHorizonalIcon
                                     width={20}

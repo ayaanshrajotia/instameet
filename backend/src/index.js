@@ -3,11 +3,13 @@ import { Server } from "socket.io";
 import http from "http";
 import dotenv from "dotenv";
 import path from "path";
+import { model } from "./libs/gemini.js";
 
 dotenv.config();
 const __dirname = path.resolve();
 
 const app = express();
+app.use(express.json());
 const server = http.createServer(app);
 
 if (process.env.NODE_ENV === "production") {
@@ -69,6 +71,14 @@ io.on("connection", (socket) => {
         socketIdToPeerId.delete(socket.id); // Remove user from map
     });
 
+    socket.on("ask-question", async ({ roomId, name, prompt }) => {
+        const result = await model.generateContent(prompt);
+        io.to(roomId).emit("receive-message", {
+            name: "gemini",
+            message: result.response.text(),
+        });
+    });
+
     // ✅ Emit chat message event
     socket.on("disconnect", () => {
         const peerId = socketIdToPeerId.get(socket.id);
@@ -78,6 +88,12 @@ io.on("connection", (socket) => {
         }
         console.log("User disconnected:", peerId);
     });
+});
+
+app.post("/gemini", async (req, res) => {
+    const { prompt } = req.body;
+    const result = await model.generateContent(prompt);
+    res.json({ text: result.response.text() });
 });
 
 server.listen(process.env.PORT, () => {
