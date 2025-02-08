@@ -20,19 +20,17 @@ if (process.env.NODE_ENV === "production") {
 
 const socketIdToPeerId = new Map();
 
-setTimeout(() => {
-    console.log("All Mapped IDs:", [...socketIdToPeerId.entries()]);
-}, 5000);
-
 const io = new Server(server, {
     cors: {
         origin: "*",
+        methods: ["GET", "POST"],
     },
 });
 
 io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
+    // ✅ Emit join chat event
     socket.on("join-chat", ({ roomId, id, name }) => {
         socketIdToPeerId.set(socket.id, id);
         console.log("map:", socketIdToPeerId.get(socket.id));
@@ -57,6 +55,13 @@ io.on("connection", (socket) => {
         socket.broadcast.to(roomId).emit("toggle-video", { userId, video });
     });
 
+    // ✅ Emit send message event
+    socket.on("send-message", ({ roomId, name, message }) => {
+        console.log(`${name} in ${roomId}:`, message);
+        io.to(roomId).emit("receive-message", { name, message });
+    });
+
+    // ✅ Emit leave chat event
     socket.on("leave-chat", ({ roomId, id }) => {
         console.log(`User ${id} left room ${roomId}`);
         socket.leave(roomId);
@@ -64,6 +69,7 @@ io.on("connection", (socket) => {
         socketIdToPeerId.delete(socket.id); // Remove user from map
     });
 
+    // ✅ Emit chat message event
     socket.on("disconnect", () => {
         const peerId = socketIdToPeerId.get(socket.id);
         if (peerId) {

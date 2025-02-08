@@ -6,3 +6,22 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
+
+/* Hide scrollbar track (background) */
+::-webkit-scrollbar {
+    width: 4px; /* Adjust width if needed */
+}
+
+::-webkit-scrollbar-track {
+    background: transparent; /* Makes scrollbar background invisible */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888; /* Style scrollbar thumb */
+    border-radius: 6px;
+    margin: 0px 0px 0px 2px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
