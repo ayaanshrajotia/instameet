@@ -58,7 +58,7 @@ function ChatRoom() {
         if (!stream) return;
 
         peer.on("open", (id) => {
-            console.log("My peer ID is:", id);
+            // console.log("My peer ID is:", id);
             setMyId(id);
 
             // ✅ Prevent duplicate self-addition
@@ -82,15 +82,15 @@ function ChatRoom() {
     useEffect(() => {
         if (!stream) return;
         const handleUserConnected = ({ name: newUserName, id: newUserId }) => {
-            console.log("User connected:", newUserName, newUserId);
+            // console.log("User connected:", newUserName, newUserId);
 
             // ✅ Call the new user and send your name in metadata
             const call = peer.call(newUserId, stream, { metadata: { name } });
 
             call.on("stream", (incomingStream) => {
-                console.log(
-                    `Incoming stream from ${newUserId} (${newUserName})`
-                );
+                // console.log(
+                //     `Incoming stream from ${newUserId} (${newUserName})`
+                // );
 
                 setConnectedPeers((prevPeers) => {
                     if (prevPeers.some((peer) => peer.id === newUserId))
@@ -126,7 +126,7 @@ function ChatRoom() {
 
             // Set the peer stream
             call.on("stream", (incomingStream) => {
-                console.log(`Incoming stream from ${callerId} (${callerName})`);
+                // console.log(`Incoming stream from ${callerId} (${callerName})`);
                 // setPeerStream(incomingStream);
                 if (connectedPeers.find((peer) => peer.id === callerId)) return;
                 setConnectedPeers((prevPeers) => {
@@ -172,7 +172,7 @@ function ChatRoom() {
         }
 
         // Emit mic toggle event to other users
-        socket.emit("toggle-mic", { userId, muted: !userPeer.muted });
+        socket.emit("toggle-mic", { roomId, userId, muted: !userPeer.muted });
     };
 
     const toggleVideo = (userId) => {
@@ -218,7 +218,7 @@ function ChatRoom() {
 
         // Listen for the user leaving the chat
         socket.on("user-leaves", (userId) => {
-            console.log("User left:", userId);
+            // console.log("User left:", userId);
             setConnectedPeers((prevPeers) =>
                 prevPeers.filter((peer) => peer.id !== userId)
             );
@@ -246,7 +246,7 @@ function ChatRoom() {
     // console.log({ peer });
     // console.log(myId, name, roomId);
     // console.log({ stream, peerStream });
-    console.log({ connectedPeers });
+    // console.log({ connectedPeers });
 
     return (
         <div className="">
@@ -274,7 +274,7 @@ function ChatRoom() {
                 </div>
             </nav>
             <div
-                className={`grid 
+                className={`grid
                 ${
                     connectedPeers.length === 1
                         ? "grid-cols-1"
@@ -296,8 +296,17 @@ function ChatRoom() {
                         peer.video ? (
                             <div
                                 key={peer.id}
-                                className={`relative flex h-full w-full justify-center items-center bg-[#242A2E] rounded-xl overflow-hidden transition-all duration-700 `}
+                                className={`relative flex h-full w-full justify-center items-center bg-[#242A2E] rounded-xl overflow-hidden transition-all duration-700`}
                             >
+                                <div className="absolute top-0 right-0 p-2 flex">
+                                    <div className=" flex items-center justify-center bg-[#242A2E] rounded-full p-3 cursor-pointer">
+                                        {!peer.muted ? (
+                                            <Mic width={20} height={20} />
+                                        ) : (
+                                            <MicOff width={20} height={20} />
+                                        )}
+                                    </div>
+                                </div>
                                 <ReactPlayer
                                     url={peer.stream}
                                     playing={true}
@@ -327,7 +336,7 @@ function ChatRoom() {
                                 className={`${
                                     connectedPeers.length === 1
                                         ? "h-full w-full relative"
-                                        : "absolute bottom-[80px] right-[20px] h-[180px] w-[300px] m-4 shadow-xl"
+                                        : "absolute bottom-[80px] right-[20px] max-md:h-[100px] max-md:w-[200px] h-[150px] w-[250px] m-4 shadow-xl"
                                 }  flex justify-center items-center bg-[#242A2E] rounded-xl overflow-hidden transition-all duration-700`}
                             >
                                 <ReactPlayer

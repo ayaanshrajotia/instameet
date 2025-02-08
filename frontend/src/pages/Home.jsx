@@ -44,11 +44,11 @@ function Home() {
 
     useEffect(() => {
         socket.on("connect", () => {
-            console.log("Connected to server");
+            // console.log("Connected to server");
         });
 
         socket.on("disconnect", () => {
-            console.log("Disconnected from server");
+            // console.log("Disconnected from server");
         });
 
         return () => {
