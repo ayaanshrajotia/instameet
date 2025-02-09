@@ -44,7 +44,16 @@ function ChatRoom() {
 
     const peerRef = useRef(null);
     if (!peerRef.current) {
-        peerRef.current = new Peer();
+        peerRef.current = new Peer({
+            config: {
+                iceServers: [
+                    { urls: "stun:stun.l.google.com:19302" },
+                    { urls: "stun:stun1.l.google.com:19302" },
+                    { urls: "stun:stun2.l.google.com:19302" },
+                    { urls: "stun:global.stun.twilio.com:3478" },
+                ],
+            },
+        });
     }
     const peer = peerRef.current;
 
@@ -203,7 +212,9 @@ function ChatRoom() {
 
             // Set the peer stream
             call.on("stream", (incomingStream) => {
-                console.log(`ANSWER: Incoming stream from ${callerId} (${callerName})`);
+                console.log(
+                    `ANSWER: Incoming stream from ${callerId} (${callerName})`
+                );
                 // setPeerStream(incomingStream);
                 if (connectedPeers.find((peer) => peer.id === callerId)) return;
                 setConnectedPeers((prevPeers) => {

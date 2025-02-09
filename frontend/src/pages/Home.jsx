@@ -26,6 +26,11 @@ function Home() {
             return;
         }
 
+        if (!stream) {
+            toast.error("Failed to access camera/microphone");
+            return;
+        }
+
         socket.emit("join-room", { name, room });
         navigate(`/chat-room/${room}`);
     };
