@@ -166,7 +166,7 @@ function ChatRoom() {
 
             call.on("stream", (incomingStream) => {
                 console.log(
-                    `Incoming stream from ${newUserId} (${newUserName})`
+                    `CALL: Incoming stream from ${newUserId} (${newUserName})`
                 );
 
                 setConnectedPeers((prevPeers) => {
@@ -203,7 +203,7 @@ function ChatRoom() {
 
             // Set the peer stream
             call.on("stream", (incomingStream) => {
-                console.log(`Incoming stream from ${callerId} (${callerName})`);
+                console.log(`ANSWER: Incoming stream from ${callerId} (${callerName})`);
                 // setPeerStream(incomingStream);
                 if (connectedPeers.find((peer) => peer.id === callerId)) return;
                 setConnectedPeers((prevPeers) => {
@@ -293,7 +293,7 @@ function ChatRoom() {
     // console.log({ peer });
     // console.log(myId, name, roomId);
     // console.log({ stream, peerStream });
-    // console.log({ connectedPeers });
+    console.log({ connectedPeers });
 
     return (
         <div className="">
