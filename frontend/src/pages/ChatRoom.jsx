@@ -135,7 +135,7 @@ function ChatRoom() {
         if (!stream) return;
 
         peer.on("open", (id) => {
-            // console.log("My peer ID is:", id);
+            console.log("My peer ID is:", id);
             setMyId(id);
 
             // ✅ Prevent duplicate self-addition
@@ -165,9 +165,9 @@ function ChatRoom() {
             const call = peer.call(newUserId, stream, { metadata: { name } });
 
             call.on("stream", (incomingStream) => {
-                // console.log(
-                //     `Incoming stream from ${newUserId} (${newUserName})`
-                // );
+                console.log(
+                    `Incoming stream from ${newUserId} (${newUserName})`
+                );
 
                 setConnectedPeers((prevPeers) => {
                     if (prevPeers.some((peer) => peer.id === newUserId))
@@ -203,7 +203,7 @@ function ChatRoom() {
 
             // Set the peer stream
             call.on("stream", (incomingStream) => {
-                // console.log(`Incoming stream from ${callerId} (${callerName})`);
+                console.log(`Incoming stream from ${callerId} (${callerName})`);
                 // setPeerStream(incomingStream);
                 if (connectedPeers.find((peer) => peer.id === callerId)) return;
                 setConnectedPeers((prevPeers) => {
